@@ -1,34 +1,26 @@
-from flask import Flask, request, render_template
-import torch.nn as nn
+import streamlit as st
 import torch
+import torch.nn as nn
 import numpy as np
 from torchvision import transforms
 import cv2
-import base64
-from net import Net
+from PIL import Image
+from net import Net  # Ensure you have the Net model definition available
 
-app = Flask(__name__)
+# Load the model
 ML_MODEL = None
-ML_MODEL_FILE = "/workspaces/fruit-freshness-detector/fruit-freshness-detector-web/model.pt"  # Update with the full path to your model file
+ML_MODEL_FILE = "model.pt"
 TORCH_DEVICE = "cpu"
 
 def get_model():
     """Loading the ML model once and returning the ML model"""
     global ML_MODEL
     if not ML_MODEL:
-        try:
-            ML_MODEL = Net()
-            ML_MODEL.load_state_dict(
-                torch.load(ML_MODEL_FILE, map_location=torch.device(TORCH_DEVICE))
-            )
-            ML_MODEL.eval()
-        except FileNotFoundError:
-            print(f"Model file not found: {ML_MODEL_FILE}")
-            raise
-        except Exception as e:
-            print(f"Error loading the model: {e}")
-            raise
-
+        ML_MODEL = Net()
+        ML_MODEL.load_state_dict(
+            torch.load(ML_MODEL_FILE, map_location=torch.device(TORCH_DEVICE))
+        )
+        ML_MODEL.eval()
     return ML_MODEL
 
 def freshness_label(freshness_percentage):
@@ -44,9 +36,6 @@ def freshness_label(freshness_percentage):
         return "It is rotten, do not eat it."
 
 def freshness_percentage_by_cv_image(cv_image):
-    """
-    Reference: https://github.com/anshuls235/freshness-detector/blob/4cd289fb05a14d3c710813fca4d8d03987d656e5/main.py#L40
-    """
     mean = (0.7369, 0.6360, 0.5318)
     std = (0.3281, 0.3417, 0.3704)
     transformation = transforms.Compose([
@@ -60,7 +49,7 @@ def freshness_percentage_by_cv_image(cv_image):
     out = get_model()(batch)
     s = nn.Softmax(dim=1)
     result = s(out)
-    return int(result[0][0].item()*100)
+    return int(result[0][0].item() * 100)
 
 def imdecode_image(image_file):
     return cv2.imdecode(
@@ -74,39 +63,20 @@ def recognize_fruit_by_cv_image(cv_image):
         "freshness_percentage": freshness_percentage,
     }
 
-## API
+# Streamlit app
+st.title("Fruit Freshness Detector")
 
-@app.route('/api/recognize', methods=["POST"])
-def api_recognize():
-    cv_image = imdecode_image(request.files["image"])
-    return recognize_fruit_by_cv_image(cv_image)
+uploaded_file = st.file_uploader("Choose an image...", type="jpg")
 
-## Web pages
+if uploaded_file is not None:
+    image = Image.open(uploaded_file)
+    st.image(image, caption='Uploaded Image.', use_column_width=True)
+    st.write("")
+    st.write("Classifying...")
 
-@app.route("/")
-def index_page():
-    return render_template("index.html")
-
-@app.route("/purchase", methods=["POST"])
-def purchase_page():
-    return render_template("purchase.html")
-
-@app.route("/checkout", methods=["POST"])
-def checkout_page():
-    cv_image = imdecode_image(request.files["image"])
+    cv_image = np.array(image.convert('RGB'))
     fruit_information = recognize_fruit_by_cv_image(cv_image)
     freshness_percentage = fruit_information["freshness_percentage"]
 
-    # show submitted image
-    image_content = cv2.imencode('.jpg', cv_image)[1].tobytes()
-    encoded_image = base64.encodebytes(image_content)
-    base64_image = 'data:image/jpg;base64, ' + str(encoded_image, 'utf-8')
-    return render_template(
-        "checkout.html",
-        freshness_percentage=freshness_percentage,
-        freshness_label=freshness_label(freshness_percentage),
-        base64_image=base64_image
-    )
-
-if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0')
+    st.write(f"Freshness Percentage: {freshness_percentage}%")
+    st.write(f"Freshness Label: {freshness_label(freshness_percentage)}")
