@@ -59,12 +59,6 @@ def freshness_percentage_by_cv_image(cv_image):
     result = s(out)
     return int(result[0][0].item() * 100)
 
-def imdecode_image(image_file):
-    return cv2.imdecode(
-        np.frombuffer(image_file.read(), np.uint8),
-        cv2.IMREAD_UNCHANGED
-    )
-
 def recognize_fruit_by_cv_image(cv_image):
     freshness_percentage = freshness_percentage_by_cv_image(cv_image)
     if freshness_percentage is None:
