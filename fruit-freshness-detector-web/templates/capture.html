@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Capture Fruit Image</title>
+</head>
+<body>
+    <h1>Capture Fruit Image</h1>
+    <button onclick="captureImage()">Capture Image</button>
+    <script>
+        async function captureImage() {
+            const response = await fetch('/capture_image', {
+                method: 'POST'
+            });
+            if (response.ok) {
+                window.location.href = "/checkout";
+            } else {
+                alert('Failed to capture image');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fruit Freshness Detector</title>
+    <style>
+        #video {
+            display: block;
+            margin: 0 auto;
+        }
+        #canvas {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Fruit Freshness Detector</h1>
+    <video id="video" width="640" height="480" autoplay></video>
+    <button id="snap">Snap Photo</button>
+    <canvas id="canvas" width="640" height="480"></canvas>
+    <form id="uploadForm" method="POST" action="/checkout" enctype="multipart/form-data">
+        <input type="hidden" id="imageData" name="imageData">
+        <input type="submit" value="Analyze Freshness">
+    </form>
+
+    <script>
+        // Get access to the camera
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
+                var video = document.getElementById('video');
+                video.srcObject = stream;
+                video.play();
+            });
+        }
+
+        // Elements for taking the snapshot
+        var canvas = document.getElementById('canvas');
+        var context = canvas.getContext('2d');
+        var video = document.getElementById('video');
+
+        // Trigger photo take
+        document.getElementById("snap").addEventListener("click", function() {
+            context.drawImage(video, 0, 0, 640, 480);
+            var dataUrl = canvas.toDataURL('image/jpeg');
+            document.getElementById('imageData').value = dataUrl;
+        });
+    </script>
+</body>
+</html>
