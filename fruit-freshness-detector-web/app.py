@@ -10,7 +10,8 @@ import os
 
 # Load the model
 ML_MODEL = None
-ML_MODEL_FILE = "model.pt"
+current_dir = os.path.dirname(os.path.abspath(__file__))
+ML_MODEL_FILE = os.path.join(current_dir, "model.pt")
 TORCH_DEVICE = "cpu"
 
 def get_model():
@@ -91,3 +92,6 @@ if uploaded_file is not None:
         st.write(f"Freshness Label: {freshness_label(freshness_percentage)}")
     else:
         st.error("An error occurred while processing the image.")
+
+if __name__ == "__main__":
+    st.run()
