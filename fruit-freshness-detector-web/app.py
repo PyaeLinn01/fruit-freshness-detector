@@ -8,13 +8,11 @@ from PIL import Image
 from net import Net  # Ensure you have the Net model definition available
 import os
 
-# Get the current directory
+# Load the model
+ML_MODEL = None
 current_dir = os.path.dirname(os.path.abspath(__file__))
 ML_MODEL_FILE = os.path.join(current_dir, "model.pt")
 TORCH_DEVICE = "cpu"
-
-# Load the model
-ML_MODEL = None
 
 def get_model():
     """Loading the ML model once and returning the ML model"""
@@ -78,19 +76,25 @@ def recognize_fruit_by_cv_image(cv_image):
 # Streamlit app
 st.title("Fruit Freshness Detector")
 
-uploaded_file = st.file_uploader("Choose an image...", type="jpg")
+uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
-    image = Image.open(uploaded_file)
-    st.image(image, caption='Uploaded Image.', use_column_width=True)
-    st.write("")
-    st.write("Classifying...")
+    try:
+        image = Image.open(uploaded_file)
+        st.image(image, caption='Uploaded Image.', use_column_width=True)
+        st.write("")
+        st.write("Classifying...")
 
-    cv_image = np.array(image.convert('RGB'))
-    fruit_information = recognize_fruit_by_cv_image(cv_image)
-    if fruit_information is not None:
-        freshness_percentage = fruit_information["freshness_percentage"]
-        st.write(f"Freshness Percentage: {freshness_percentage}%")
-        st.write(f"Freshness Label: {freshness_label(freshness_percentage)}")
-    else:
-        st.error("An error occurred while processing the image.")
+        cv_image = np.array(image.convert('RGB'))
+        fruit_information = recognize_fruit_by_cv_image(cv_image)
+        if fruit_information is not None:
+            freshness_percentage = fruit_information["freshness_percentage"]
+            st.write(f"Freshness Percentage: {freshness_percentage}%")
+            st.write(f"Freshness Label: {freshness_label(freshness_percentage)}")
+        else:
+            st.error("An error occurred while processing the image.")
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
+
+if __name__ == "__main__":
+    st.run()
