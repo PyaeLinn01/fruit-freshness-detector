@@ -6,6 +6,7 @@ from torchvision import transforms
 import cv2
 from PIL import Image
 from net import Net  # Ensure you have the Net model definition available
+import os
 
 # Load the model
 ML_MODEL = None
@@ -16,6 +17,9 @@ def get_model():
     """Loading the ML model once and returning the ML model"""
     global ML_MODEL
     if not ML_MODEL:
+        if not os.path.exists(ML_MODEL_FILE):
+            st.error(f"Model file '{ML_MODEL_FILE}' not found. Please ensure it is in the correct directory.")
+            return None
         ML_MODEL = Net()
         ML_MODEL.load_state_dict(
             torch.load(ML_MODEL_FILE, map_location=torch.device(TORCH_DEVICE))
@@ -46,7 +50,10 @@ def freshness_percentage_by_cv_image(cv_image):
     image = cv2.resize(image, (32, 32))
     image_tensor = transformation(image)
     batch = image_tensor.unsqueeze(0)
-    out = get_model()(batch)
+    model = get_model()
+    if model is None:
+        return None
+    out = model(batch)
     s = nn.Softmax(dim=1)
     result = s(out)
     return int(result[0][0].item() * 100)
@@ -59,6 +66,8 @@ def imdecode_image(image_file):
 
 def recognize_fruit_by_cv_image(cv_image):
     freshness_percentage = freshness_percentage_by_cv_image(cv_image)
+    if freshness_percentage is None:
+        return None
     return {
         "freshness_percentage": freshness_percentage,
     }
@@ -76,7 +85,9 @@ if uploaded_file is not None:
 
     cv_image = np.array(image.convert('RGB'))
     fruit_information = recognize_fruit_by_cv_image(cv_image)
-    freshness_percentage = fruit_information["freshness_percentage"]
-
-    st.write(f"Freshness Percentage: {freshness_percentage}%")
-    st.write(f"Freshness Label: {freshness_label(freshness_percentage)}")
+    if fruit_information is not None:
+        freshness_percentage = fruit_information["freshness_percentage"]
+        st.write(f"Freshness Percentage: {freshness_percentage}%")
+        st.write(f"Freshness Label: {freshness_label(freshness_percentage)}")
+    else:
+        st.error("An error occurred while processing the image.")
