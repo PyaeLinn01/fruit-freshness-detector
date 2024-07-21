@@ -1,8 +1,6 @@
-[![Test](https://github.com/Bangkit2021-0347/fruit-freshness-detector-web/actions/workflows/test.yml/badge.svg)](https://github.com/Bangkit2021-0347/fruit-freshness-detector-web/actions/workflows/test.yml)
+# Fruit freshness detector web app 2024
 
-# Fruit freshness detector web app for Bangkit Capstone Project 2021
-
-Our website for Bangkit Capstone Project that can predict the level of ripeness of fruits and how much the cost would be.
+Our website can predict the level of ripeness of fruits and recommend that you should eat or not.
 
 ## Prerequisite
 
@@ -12,8 +10,8 @@ Our website for Bangkit Capstone Project that can predict the level of ripeness 
 
 Clone this repository and go to the cloned folder.
 ```bash
-git clone https://github.com/Bangkit2021-0347/fruit-freshness-detector-web.git
-cd fruit-freshness-detector-web
+git clone https://github.com/PyaeLinn01/fruit-freshness-detector.git
+cd fruit-freshness-detector
 ```
 
 
