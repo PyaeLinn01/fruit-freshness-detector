@@ -68,7 +68,7 @@ def recognize_fruit_by_cv_image(cv_image):
     }
 
 # Streamlit app
-st.title("Fruit Freshness Detector")
+st.title("AI-Powered Fruit Freshness Detector")
 
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
