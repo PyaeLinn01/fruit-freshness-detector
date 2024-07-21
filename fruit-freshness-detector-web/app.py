@@ -89,3 +89,5 @@ if uploaded_file is not None:
             st.error("An error occurred while processing the image.")
     except Exception as e:
         st.error(f"An error occurred: {e}")
+
+# Note: The 'if __name__ == "__main__"' part is not needed for Streamlit
